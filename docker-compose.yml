@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: email_user
+      POSTGRES_PASSWORD: email_pass
+      POSTGRES_DB: email_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  fastapi:
+    build: .
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgresql://email_user:email_pass@db:5432/email_db
+      REDIS_URL: redis://redis:6379/0
+      SMTP_SERVER: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: contact@ibcb-a.com
+      SMTP_PASSWORD: jsdvbaioframqewv
+      SENDER_NAME: "iBCB Email System"
+    ports:
+      - "8000:8000"
+
+  worker:
+    build: .
+    depends_on:
+      - fastapi
+      - redis
+    environment:
+      DATABASE_URL: postgresql://email_user:email_pass@db:5432/email_db
+      REDIS_URL: redis://redis:6379/0
+      SMTP_SERVER: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: contact@ibcb-a.com
+      SMTP_PASSWORD: jsdvbaioframqewv
+      SENDER_NAME: "iBCB Email System"
+    command: ["python", "run_simple_worker.py"]
+
+volumes:
+  db_data:
