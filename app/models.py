@@ -29,6 +29,68 @@ class SendJobState(str, Enum):
 
 
 # ============================================================
+# CONTACTS
+# ============================================================
+
+class Contact(Base):
+    __tablename__ = "contacts"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Identité contact
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    first_name = Column(String(100), nullable=True)
+    last_name = Column(String(100), nullable=True)
+
+    # Champs utiles pour les leads capturés depuis les landing pages
+    language = Column(String(10), nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    # Relations
+    jobs = relationship(
+        "SendJob",
+        back_populates="contact",
+        cascade="all, delete-orphan",
+    )
+
+    lead_submissions = relationship(
+        "LeadSubmission",
+        back_populates="contact",
+        cascade="all, delete-orphan",
+    )
+
+
+# ============================================================
+# SOUMISSIONS DE LEADS (landing pages)
+# Une même personne peut soumettre plusieurs formulaires
+# depuis différentes landing pages / catégories.
+# ============================================================
+
+class LeadSubmission(Base):
+    __tablename__ = "lead_submissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    contact_id = Column(
+        Integer,
+        ForeignKey("contacts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    submitted_at = Column(DateTime, nullable=True)
+    category = Column(String(255), nullable=True)
+    source = Column(String(255), nullable=True)
+    ip_address = Column(String(64), nullable=True)
+    user_agent = Column(Text, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    contact = relationship("Contact", back_populates="lead_submissions")
+
+
+# ============================================================
 # CAMPAGNES
 # ============================================================
 
@@ -38,7 +100,11 @@ class Campaign(Base):
     id = Column(Integer, primary_key=True, index=True)
     subject = Column(String(255), nullable=False)
     html = Column(Text, nullable=False)
-    from_code = Column(String(50), nullable=False)  # ex: "smtp", "gmail", "sendgrid"
+
+    # code du canal d'envoi par défaut pour cette campagne
+    # (ex: "smtp", "gmail", "sendgrid", "ses")
+    from_code = Column(String(50), nullable=False)
+
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     jobs = relationship(
@@ -46,26 +112,12 @@ class Campaign(Base):
         back_populates="campaign",
         cascade="all, delete-orphan",
     )
+
     logs = relationship(
         "CampaignLog",
         back_populates="campaign",
         cascade="all, delete-orphan",
     )
-
-
-# ============================================================
-# CONTACTS
-# ============================================================
-
-class Contact(Base):
-    __tablename__ = "contacts"
-
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
-    first_name = Column(String(100), nullable=True)
-    last_name = Column(String(100), nullable=True)
-
-    jobs = relationship("SendJob", back_populates="contact")
 
 
 # ============================================================
@@ -76,20 +128,35 @@ class SendJob(Base):
     __tablename__ = "send_jobs"
 
     id = Column(Integer, primary_key=True, index=True)
-    campaign_id = Column(Integer, ForeignKey("campaigns.id"), nullable=False, index=True)
-    contact_id = Column(Integer, ForeignKey("contacts.id"), nullable=False, index=True)
+
+    campaign_id = Column(
+        Integer,
+        ForeignKey("campaigns.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    contact_id = Column(
+        Integer,
+        ForeignKey("contacts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
 
     state = Column(
         SqlEnum(SendJobState),
         default=SendJobState.PENDING,
         nullable=False,
     )
+
     sent_at = Column(DateTime, nullable=True)
     error_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
 
-    # code du canal d'envoi utilisé : "smtp", "gmail", "sendgrid", "mailgun", etc.
+    # code du canal d'envoi réellement utilisé : "smtp", "gmail", "sendgrid", "ses", etc.
     sender_code = Column(String(50), nullable=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     campaign = relationship("Campaign", back_populates="jobs")
     contact = relationship("Contact", back_populates="jobs")
@@ -103,7 +170,13 @@ class CampaignLog(Base):
     __tablename__ = "campaign_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    campaign_id = Column(Integer, ForeignKey("campaigns.id"), nullable=False, index=True)
+
+    campaign_id = Column(
+        Integer,
+        ForeignKey("campaigns.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
 
     total = Column(Integer, nullable=False)
     sent = Column(Integer, nullable=False)
@@ -114,7 +187,8 @@ class CampaignLog(Base):
 
 
 # ============================================================
-# 🔥 PARAMÈTRES SMTP
+# PARAMÈTRES D'ENVOI (GLOBAL) — SMTP / SENDGRID / SES
+# Cette table est "globale" : on garde un seul enregistrement (id=1).
 # ============================================================
 
 class SettingsSMTP(Base):
@@ -122,23 +196,31 @@ class SettingsSMTP(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    provider = Column(String(50), default="gmail")
-    # gmail, smtp_custom, sendgrid_smtp, outlook_smtp, etc.
+    # Provider sélectionné par défaut
+    provider = Column(String(50), default="gmail", nullable=False)
 
-    smtp_host = Column(String(255), nullable=True)
-    smtp_port = Column(Integer, nullable=True)
-
-    smtp_username = Column(String(255), nullable=True)
-    smtp_password = Column(String(255), nullable=True)  # stocké en clair pour l'instant
-
-    use_tls = Column(Boolean, default=True)
-
+    # Identité expéditeur (commune)
     from_name = Column(String(255), nullable=True)
     from_email = Column(String(255), nullable=True)
 
+    # -------- SMTP (gmail / smtp custom / outlook etc.) --------
+    smtp_host = Column(String(255), nullable=True)
+    smtp_port = Column(Integer, nullable=True)
+    smtp_username = Column(String(255), nullable=True)
+    smtp_password = Column(String(255), nullable=True)  # à sécuriser plus tard
+    use_tls = Column(Boolean, default=True, nullable=False)
+
+    # -------- SendGrid (API) --------
+    sendgrid_api_key = Column(String(255), nullable=True)
+
+    # -------- Amazon SES --------
+    ses_region = Column(String(64), nullable=True)
+    ses_access_key_id = Column(String(255), nullable=True)
+    ses_secret_access_key = Column(String(255), nullable=True)
+
 
 # ============================================================
-# 🔧 PARAMÈTRES GÉNÉRAUX (profil, langue, notifications)
+# PARAMÈTRES GÉNÉRAUX (profil, langue, notifications)
 # ============================================================
 
 class SettingsGeneral(Base):
@@ -146,26 +228,18 @@ class SettingsGeneral(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    # Nom affiché dans l’interface (ex : "Claude / iBCB Admin")
     display_name = Column(String(255), nullable=True)
-
-    # Langue par défaut de l’interface (ex: "fr", "en")
     language = Column(String(10), default="fr", nullable=False)
-
-    # Fuseau horaire (ex: "Europe/Paris")
     timezone = Column(String(64), default="Europe/Paris", nullable=False)
-
-    # Thème UI (light / dark)
     theme = Column(String(20), default="light", nullable=False)
 
-    # Notifications (email ou UI) pour certains événements
     notify_on_errors = Column(Boolean, default=True, nullable=False)
     notify_on_quota = Column(Boolean, default=True, nullable=False)
     notify_on_login = Column(Boolean, default=True, nullable=False)
 
 
 # ============================================================
-# 🔑 CLÉS API
+# CLÉS API
 # ============================================================
 
 class ApiKey(Base):
@@ -173,27 +247,17 @@ class ApiKey(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    # Nom lisible dans l’UI (ex : "Prod – iBCB RocketMail", "Zapier", etc.)
     name = Column(String(255), nullable=False)
-
-    # Préfixe visible de la clé (utilisé côté UI / logs)
-    # ex: "rk_7fa3c9b4"
     key_prefix = Column(String(50), unique=True, index=True, nullable=False)
-
-    # Hash du secret (SHA256 du segment secret, jamais renvoyé tel quel)
     secret_hash = Column(String(128), nullable=False)
-
-    # Scopes stockés sous forme de chaîne "campaigns:read,emails:send"
     scopes = Column(String(255), nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-
-    # Clé active ou non (utile si tu veux désactiver sans supprimer)
     is_active = Column(Boolean, default=True, nullable=False)
 
 
 # ============================================================
-# 💳 PARAMÈTRES DE FACTURATION / PLAN
+# PARAMÈTRES DE FACTURATION / PLAN
 # ============================================================
 
 class SettingsBilling(Base):
@@ -201,17 +265,126 @@ class SettingsBilling(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    # Plan actuel : "free", "pro", "enterprise", etc.
     plan = Column(String(50), default="free", nullable=False)
-
-    # Quota d’emails mensuel
     monthly_quota = Column(Integer, default=5000, nullable=False)
-
-    # Nombre d’emails déjà consommés dans la période courante
     used_quota = Column(Integer, default=0, nullable=False)
-
-    # Date de renouvellement du quota (ex: début de mois)
     renews_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+# ============================================================
+# UNSUBSCRIBES
+# ============================================================
+
+class Unsubscribe(Base):
+    __tablename__ = "unsubscribes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    reason = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+
+
+# ============================================================
+# LINK ROTATOR / CLICK TRACKING
+# ============================================================
+
+class Link(Base):
+    __tablename__ = "links"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    campaign_id = Column(
+        Integer,
+        ForeignKey("campaigns.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    label = Column(String(255), nullable=True)
+    original_url = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    campaign = relationship("Campaign")
+    variants = relationship(
+        "LinkVariant",
+        back_populates="link",
+        cascade="all, delete-orphan",
+    )
+    clicks = relationship(
+        "ClickEvent",
+        back_populates="link",
+        cascade="all, delete-orphan",
+    )
+
+
+class LinkVariant(Base):
+    __tablename__ = "link_variants"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    link_id = Column(
+        Integer,
+        ForeignKey("links.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    url = Column(Text, nullable=False)
+    weight = Column(Integer, default=100, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    link = relationship("Link", back_populates="variants")
+    clicks = relationship(
+        "ClickEvent",
+        back_populates="variant",
+        cascade="all, delete-orphan",
+    )
+
+
+class ClickEvent(Base):
+    __tablename__ = "click_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    campaign_id = Column(
+        Integer,
+        ForeignKey("campaigns.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    contact_id = Column(
+        Integer,
+        ForeignKey("contacts.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
+    link_id = Column(
+        Integer,
+        ForeignKey("links.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    variant_id = Column(
+        Integer,
+        ForeignKey("link_variants.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
+    clicked_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    ip_address = Column(String(64), nullable=True)
+    user_agent = Column(Text, nullable=True)
+
+    link = relationship("Link", back_populates="clicks")
+    variant = relationship("LinkVariant", back_populates="clicks")
+    campaign = relationship("Campaign")
+    contact = relationship("Contact")
 
 
 

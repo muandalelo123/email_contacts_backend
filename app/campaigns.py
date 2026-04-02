@@ -1,14 +1,13 @@
-
 # app/campaigns.py
 
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
+from sqlalchemy.orm import Session
 
-# Import à adapter selon ton projet :
-# Ici, on suppose que tu as déjà une fonction send_email dans app/email_utils.py
-from .email_utils import send_email  # fonction existante d’envoi d’email
+from .email_utils import send_email
+from .models import Campaign, SendJob, SendJobState
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
@@ -36,10 +35,6 @@ class TestEmailIn(CampaignBase):
 
 
 class CampaignSendNowIn(CampaignBase):
-    """
-    Pour l’instant identique à CampaignBase.
-    Tu pourras ajouter des champs (ex: filters, tags…) plus tard.
-    """
     pass
 
 
@@ -65,14 +60,14 @@ async def save_draft(payload: CampaignBase):
 @router.post("/send-test")
 async def send_test_email(payload: TestEmailIn):
     """
-    Envoie un email de test à une seule adresse (to_email).
+    Envoie un email de test à une seule adresse.
     """
     try:
         send_email(
+            to=payload.to_email,
             subject=payload.subject,
-            body=payload.content,
-            sender=payload.from_email,
-            recipients=[payload.to_email],
+            html=payload.content,
+            sender_code="gmail",
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -83,24 +78,14 @@ async def send_test_email(payload: TestEmailIn):
 @router.post("/send-now")
 async def send_now(payload: CampaignSendNowIn):
     """
-    Envoi immédiat de la campagne à tous les contacts.
-    Pour le moment, la logique réelle n’est pas encore branchée.
+    Envoi immédiat de la campagne.
+    Route placeholder pour l’instant.
+    La vraie logique bulk est déjà gérée ailleurs dans ton projet.
     """
     try:
-        # TODO :
-        # 1) Récupérer les contacts en base
-        # 2) Construire la liste des emails
-        # 3) Appeler send_email(...) avec tous les destinataires
-        #
-        # Exemple futur :
-        # contacts = get_all_contacts()
-        # recipients = [c.email for c in contacts]
-        # send_email(
-        #     subject=payload.subject,
-        #     body=payload.content,
-        #     sender=payload.from_email,
-        #     recipients=recipients,
-        # )
+        # TODO:
+        # Brancher ici plus tard la vraie logique de campagne
+        # (récupération des contacts, création de jobs, queue, etc.)
         pass
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -111,15 +96,58 @@ async def send_now(payload: CampaignSendNowIn):
 @router.post("/schedule")
 async def schedule_campaign(payload: CampaignScheduleIn):
     """
-    Planifie l'envoi d'une campagne pour plus tard.
-    Pour l’instant, on renvoie uniquement un message de confirmation.
+    Planifie une campagne pour plus tard.
     """
-    # TODO :
-    # 1) Sauvegarder la campagne + date dans la DB
-    # 2) Créer un job différé (Celery / RQ / cron)
     return {
         "status": "ok",
         "message": f"Campaign scheduled for {payload.send_at.isoformat()}",
     }
+
+
+# ==========================
+# Service interne utilisé par main.py
+# ==========================
+
+def get_campaign_status(db: Session, campaign_id: int) -> dict:
+    """
+    Fonction de service appelée depuis main.py :
+        campaigns_service.get_campaign_status(db, campaign_id)
+
+    Retourne un dictionnaire compatible avec le schéma CampaignStatus.
+    """
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    jobs = db.query(SendJob).filter(SendJob.campaign_id == campaign_id).all()
+
+    total_jobs = len(jobs)
+    pending_jobs = sum(1 for j in jobs if j.state == SendJobState.PENDING)
+    sent_jobs = sum(1 for j in jobs if j.state == SendJobState.SENT)
+    error_jobs = sum(1 for j in jobs if j.state == SendJobState.ERROR)
+
+    if total_jobs == 0:
+        status = "draft"
+    elif sent_jobs == total_jobs:
+        status = "completed"
+    elif error_jobs == total_jobs:
+        status = "failed"
+    elif pending_jobs > 0:
+        status = "in_progress"
+    elif sent_jobs > 0 and error_jobs > 0:
+        status = "partially_completed"
+    else:
+        status = "unknown"
+
+    return {
+        "campaign_id": campaign.id,
+        "subject": campaign.subject,
+        "status": status,
+        "total_jobs": total_jobs,
+        "pending_jobs": pending_jobs,
+        "sent_jobs": sent_jobs,
+        "error_jobs": error_jobs,
+    }
+
 
 

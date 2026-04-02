@@ -2,7 +2,7 @@
 # app/schemas.py
 
 from datetime import datetime
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Literal
 
 from pydantic import BaseModel, EmailStr
 
@@ -16,7 +16,7 @@ from .models import SendJobState
 class CampaignCreate(BaseModel):
     subject: str
     html: str
-    from_code: str  # "gmail", "sendgrid", "mailgun", ...
+    from_code: str
 
 
 class CampaignRead(BaseModel):
@@ -38,22 +38,63 @@ class ContactCreate(BaseModel):
     email: EmailStr
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    language: Optional[str] = None
 
 
 class ContactUpdate(BaseModel):
     email: Optional[EmailStr] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    language: Optional[str] = None
 
 
 class ContactRead(BaseModel):
     id: int
     email: EmailStr
-    first_name: Optional[str]
-    last_name: Optional[str]
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    language: Optional[str] = None
+    created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+# ============================================================
+# LEADS / LANDING
+# ============================================================
+
+class LeadSubmissionCreate(BaseModel):
+    email: EmailStr
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    language: Optional[str] = None
+
+    submitted_at: Optional[datetime] = None
+    category: Optional[str] = None
+    source: Optional[str] = None
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+
+
+class LeadSubmissionRead(BaseModel):
+    id: int
+    contact_id: int
+    submitted_at: Optional[datetime] = None
+    category: Optional[str] = None
+    source: Optional[str] = None
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class LeadSubmissionResponse(BaseModel):
+    message: str
+    contact_id: int
+    submission_id: int
 
 
 # ============================================================
@@ -71,27 +112,29 @@ class SendJobRead(BaseModel):
     campaign_id: int
     contact_id: int
     state: SendJobState
-    sent_at: Optional[datetime]
-    error_at: Optional[datetime]
-    error_message: Optional[str]
+    sent_at: Optional[datetime] = None
+    error_at: Optional[datetime] = None
+    error_message: Optional[str] = None
     sender_code: str
-    exc_info: Optional[str] = None  # Infos RQ
+    created_at: datetime
+    exc_info: Optional[str] = None
 
     class Config:
         from_attributes = True
 
 
 # ============================================================
-# CAMPAIGN STATUS + LOGS
+# CAMPAIGN STATUS + LOGS (CORRIGÉ)
 # ============================================================
 
 class CampaignStatus(BaseModel):
     campaign_id: int
-    total: int
-    sent: int
-    errors: int
-    pending: int
-    in_queue: int
+    subject: str
+    status: str
+    total_jobs: int
+    pending_jobs: int
+    sent_jobs: int
+    error_jobs: int
 
 
 class CampaignLogRead(BaseModel):
@@ -107,18 +150,29 @@ class CampaignLogRead(BaseModel):
 
 
 # ============================================================
-# 🔥 SETTINGS SMTP
+# SETTINGS SMTP / PROVIDERS
 # ============================================================
 
+ProviderName = Literal["gmail", "smtp", "sendgrid", "ses"]
+
+
 class SettingsSMTPBase(BaseModel):
-    provider: str                     # "gmail", "smtp_custom", etc.
+    provider: ProviderName = "gmail"
+
+    from_name: Optional[str] = None
+    from_email: Optional[EmailStr] = None
+
     smtp_host: Optional[str] = None
     smtp_port: Optional[int] = None
     smtp_username: Optional[str] = None
     smtp_password: Optional[str] = None
     use_tls: bool = True
-    from_name: Optional[str] = None
-    from_email: Optional[str] = None
+
+    sendgrid_api_key: Optional[str] = None
+
+    ses_region: Optional[str] = None
+    ses_access_key_id: Optional[str] = None
+    ses_secret_access_key: Optional[str] = None
 
 
 class SettingsSMTPRead(SettingsSMTPBase):
@@ -129,22 +183,28 @@ class SettingsSMTPRead(SettingsSMTPBase):
 
 
 class SettingsSMTPUpdate(SettingsSMTPBase):
-    """
-    Même structure que SettingsSMTPBase.
-    Permet une mise à jour simple via PUT /settings/smtp.
-    """
     pass
 
 
+class SettingsSMTPReadMasked(SettingsSMTPBase):
+    id: Optional[int] = None
+    smtp_password: Optional[str] = None
+    sendgrid_api_key: Optional[str] = None
+    ses_secret_access_key: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
 # ============================================================
-# 🔧 SETTINGS GÉNÉRAUX (profil, langue, notifications)
+# SETTINGS GÉNÉRAUX
 # ============================================================
 
 class SettingsGeneralBase(BaseModel):
     display_name: Optional[str] = None
-    language: str = "fr"          # "fr", "en", ...
+    language: str = "fr"
     timezone: str = "Europe/Paris"
-    theme: str = "light"          # "light" | "dark"
+    theme: str = "light"
     notify_on_errors: bool = True
     notify_on_quota: bool = True
     notify_on_login: bool = True
@@ -158,34 +218,19 @@ class SettingsGeneralRead(SettingsGeneralBase):
 
 
 class SettingsGeneralUpdate(SettingsGeneralBase):
-    """
-    Utilisé pour PUT /settings/general.
-    """
     pass
 
 
 # ============================================================
-# 🔑 API KEYS
+# API KEYS
 # ============================================================
 
 class ApiKeyCreate(BaseModel):
-    """
-    Payload de création d'une clé API.
-    Les scopes sont une liste de chaînes
-    ex: ["emails:send", "campaigns:read"]
-    """
     name: str
     scopes: List[str] = []
 
 
 class ApiKeyRead(BaseModel):
-    """
-    Représentation d'une clé API côté lecture.
-
-    - Pour GET /settings/api-keys : le champ `secret` vaut toujours None.
-    - Pour POST /settings/api-keys : `secret` contient la clé complète
-      "<key_prefix>.<secret>" une seule fois.
-    """
     id: int
     name: str
     key_prefix: str
@@ -198,14 +243,14 @@ class ApiKeyRead(BaseModel):
 
 
 # ============================================================
-# 💳 SETTINGS BILLING / PLAN
+# BILLING
 # ============================================================
 
 class SettingsBillingBase(BaseModel):
-    plan: str = "free"          # "free", "pro", "enterprise", ...
-    monthly_quota: int = 5000   # quota mensuel d’emails
-    used_quota: int = 0         # emails consommés dans la période en cours
-    renews_at: datetime         # date de renouvellement du quota
+    plan: str = "free"
+    monthly_quota: int = 5000
+    used_quota: int = 0
+    renews_at: Optional[datetime] = None
 
 
 class SettingsBillingRead(SettingsBillingBase):
@@ -216,18 +261,15 @@ class SettingsBillingRead(SettingsBillingBase):
 
 
 class SettingsBillingUpdate(SettingsBillingBase):
-    """
-    Utilisé pour PUT /settings/billing.
-    """
     pass
 
 
 # ============================================================
-# 🌐 DOMAIN & DELIVERABILITY SETTINGS (SPF / DKIM / DMARC)
+# DOMAIN / DNS
 # ============================================================
 
 class DNSRecordDetail(BaseModel):
-    status: str                 # "Configured" | "Not configured"
+    status: str
     expected: Optional[str] = None
     selector: Optional[str] = None
 

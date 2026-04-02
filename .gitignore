@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Env
+.env
+
+# Mac
+.DS_Store
+
+# DB
+*.db
+
+# CSV temporaires
+*.csv
+
+# venv
+.venv/
