@@ -10,5 +10,8 @@ rq
 requests
 email-validator
 pydantic[email]
+python-multipart
+
+
 
 
