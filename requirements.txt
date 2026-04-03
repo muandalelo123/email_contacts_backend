@@ -8,3 +8,5 @@ python-dotenv
 redis
 rq
 requests
+email-validator
+
