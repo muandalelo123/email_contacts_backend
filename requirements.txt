@@ -9,4 +9,6 @@ redis
 rq
 requests
 email-validator
+pydantic[email]
+
 
