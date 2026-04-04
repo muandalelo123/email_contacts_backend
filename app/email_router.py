@@ -1,3 +1,5 @@
+# app/email_router.py
+
 # email_router.py
 
 from __future__ import annotations
@@ -8,7 +10,10 @@ import requests
 from sqlalchemy.orm import Session
 
 from . import email_utils
+from .config import get_settings
 from .models import SettingsSMTP
+
+settings = get_settings()
 
 
 def _get_smtp_settings(db: Session) -> SettingsSMTP | None:
@@ -71,24 +76,24 @@ def _send_via_sendgrid(
     subject: str,
     html: str,
 ) -> dict:
-    smtp_settings = _get_smtp_settings(db)
+    sendgrid_api_key = settings.SENDGRID_API_KEY
+    from_email = settings.SENDGRID_FROM_EMAIL
+    from_name = getattr(settings, "SENDER_NAME", None) or "iBCB"
 
-    if not smtp_settings or not smtp_settings.sendgrid_api_key:
-        raise RuntimeError("SendGrid API key not configured")
+    if not sendgrid_api_key:
+        raise RuntimeError("SendGrid API key not configured in environment")
 
-    if not smtp_settings.from_email:
-        raise RuntimeError("from_email is not configured in SettingsSMTP")
-
-    from_name = smtp_settings.from_name or "iBCB RocketMail"
+    if not from_email:
+        raise RuntimeError("SENDGRID_FROM_EMAIL is not configured in environment")
 
     print(f"[SENDGRID] to={to}")
-    print(f"[SENDGRID] from={smtp_settings.from_email}")
-    print(f"[SENDGRID] api_key_prefix={smtp_settings.sendgrid_api_key[:10]}...")
+    print(f"[SENDGRID] from={from_email}")
+    print(f"[SENDGRID] api_key_prefix={sendgrid_api_key[:10]}...")
 
     payload = {
         "personalizations": [{"to": [{"email": to}]}],
         "from": {
-            "email": smtp_settings.from_email,
+            "email": from_email,
             "name": from_name,
         },
         "subject": subject,
@@ -101,7 +106,7 @@ def _send_via_sendgrid(
     }
 
     headers = {
-        "Authorization": f"Bearer {smtp_settings.sendgrid_api_key}",
+        "Authorization": f"Bearer {sendgrid_api_key}",
         "Content-Type": "application/json",
     }
 
@@ -178,8 +183,6 @@ def send_email_with_fallback(
     html: str,
     sender_code: str | None = None,
 ) -> dict:
-    smtp_settings = _get_smtp_settings(db)
-
     # Temporairement forcé pour les tests
     default_provider = "sendgrid"
 
@@ -223,6 +226,5 @@ def send_email_with_fallback(
             print(f"[EMAIL ROUTER ERROR] {last_error}")
 
     raise RuntimeError(last_error or "All providers failed")
-
 
 
