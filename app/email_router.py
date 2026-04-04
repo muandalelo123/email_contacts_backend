@@ -41,7 +41,9 @@ def _build_provider_order(default_provider: str | None, sender_code: str | None)
         "ses": ["ses", "sendgrid", "gmail"],
     }
 
-    return _dedupe_keep_order(fallback.get(primary, [default_provider, "sendgrid", "ses"]))
+    return _dedupe_keep_order(
+        fallback.get(primary, [default_provider, "sendgrid", "ses"])
+    )
 
 
 def _send_via_gmail_or_smtp(
@@ -50,12 +52,16 @@ def _send_via_gmail_or_smtp(
     html: str,
     sender_code: str,
 ) -> dict:
+    print(f"[SMTP] provider={sender_code}, to={to}")
+
     email_utils.send_email(
         to=to,
         subject=subject,
         html=html,
         sender_code=sender_code,
     )
+
+    print(f"[SMTP] send_email completed via {sender_code}")
     return {"provider": sender_code, "message": "sent"}
 
 
@@ -66,6 +72,7 @@ def _send_via_sendgrid(
     html: str,
 ) -> dict:
     smtp_settings = _get_smtp_settings(db)
+
     if not smtp_settings or not smtp_settings.sendgrid_api_key:
         raise RuntimeError("SendGrid API key not configured")
 
@@ -73,6 +80,10 @@ def _send_via_sendgrid(
         raise RuntimeError("from_email is not configured in SettingsSMTP")
 
     from_name = smtp_settings.from_name or "iBCB RocketMail"
+
+    print(f"[SENDGRID] to={to}")
+    print(f"[SENDGRID] from={smtp_settings.from_email}")
+    print(f"[SENDGRID] api_key_prefix={smtp_settings.sendgrid_api_key[:10]}...")
 
     payload = {
         "personalizations": [{"to": [{"email": to}]}],
@@ -101,6 +112,9 @@ def _send_via_sendgrid(
         timeout=30,
     )
 
+    print(f"[SENDGRID RESPONSE] status={response.status_code}")
+    print(f"[SENDGRID RESPONSE] body={response.text}")
+
     if response.status_code >= 300:
         raise RuntimeError(f"SendGrid error {response.status_code}: {response.text}")
 
@@ -117,18 +131,22 @@ def _send_via_ses(
     if not smtp_settings:
         raise RuntimeError("SES settings not configured")
 
-    if not all([
-        smtp_settings.ses_region,
-        smtp_settings.ses_access_key_id,
-        smtp_settings.ses_secret_access_key,
-        smtp_settings.from_email,
-    ]):
+    if not all(
+        [
+            smtp_settings.ses_region,
+            smtp_settings.ses_access_key_id,
+            smtp_settings.ses_secret_access_key,
+            smtp_settings.from_email,
+        ]
+    ):
         raise RuntimeError("Amazon SES settings are incomplete")
 
     try:
         import boto3
     except ImportError as exc:
         raise RuntimeError("boto3 is required for SES") from exc
+
+    print(f"[SES] to={to}, from={smtp_settings.from_email}, region={smtp_settings.ses_region}")
 
     client = boto3.client(
         "ses",
@@ -149,6 +167,7 @@ def _send_via_ses(
     )
 
     message_id = response.get("MessageId")
+    print(f"[SES] message_id={message_id}")
     return {"provider": "ses", "message": "sent", "message_id": message_id}
 
 
@@ -160,15 +179,19 @@ def send_email_with_fallback(
     sender_code: str | None = None,
 ) -> dict:
     smtp_settings = _get_smtp_settings(db)
-    # default_provider = smtp_settings.provider if smtp_settings else "gmail"
 
+    # Temporairement forcé pour les tests
     default_provider = "sendgrid"
+
     provider_order = _build_provider_order(default_provider, sender_code)
+    print(f"[EMAIL ROUTER] sender_code={sender_code}, provider_order={provider_order}")
 
     last_error = None
 
     for provider in provider_order:
         try:
+            print(f"[EMAIL ROUTER] trying provider={provider}")
+
             if provider in {"gmail", "smtp"}:
                 return _send_via_gmail_or_smtp(
                     to=to,
@@ -195,9 +218,11 @@ def send_email_with_fallback(
 
             raise RuntimeError(f"Unknown provider: {provider}")
 
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             last_error = f"{provider}: {exc}"
+            print(f"[EMAIL ROUTER ERROR] {last_error}")
 
     raise RuntimeError(last_error or "All providers failed")
+
 
 
