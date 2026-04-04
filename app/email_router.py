@@ -1,3 +1,5 @@
+# email_router.py
+
 from __future__ import annotations
 
 from typing import List
@@ -158,7 +160,9 @@ def send_email_with_fallback(
     sender_code: str | None = None,
 ) -> dict:
     smtp_settings = _get_smtp_settings(db)
-    default_provider = smtp_settings.provider if smtp_settings else "gmail"
+    # default_provider = smtp_settings.provider if smtp_settings else "gmail"
+
+    default_provider = "sendgrid"
     provider_order = _build_provider_order(default_provider, sender_code)
 
     last_error = None
