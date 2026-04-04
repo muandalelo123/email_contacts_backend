@@ -3,83 +3,65 @@
 
 # app/main.py
 # app/main.py
-# app/main.py
 
 import csv
 import io
 from datetime import datetime
 from typing import List
 
-from fastapi import Request
-from fastapi.responses import RedirectResponse
-
-from . import link_rotator
-
-from fastapi.responses import StreamingResponse
-
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse, StreamingResponse
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from . import campaigns as campaigns_service
 from . import jobs as jobs_service
+from . import link_rotator
 from . import send_all
 from .campaigns import router as campaigns_router
 from .config import get_settings
 from .db import Base, engine, get_db
+from .deps import verify_api_key
 from .models import (
     Campaign,
+    ClickEvent,
     Contact,
     LeadSubmission,
+    Link,
+    LinkVariant,
     SendJob,
     SendJobState,
     Unsubscribe,
-    Link,
-    LinkVariant,
-    ClickEvent,
 )
-
-
+from .routers.settings_api_keys import router as settings_api_keys_router
+from .routers.settings_billing import router as settings_billing_router
+from .routers.settings_domain import router as settings_domain_router
+from .routers.settings_general import router as settings_general_router
+from .routers.settings_smtp import router as settings_smtp_router
 from .schemas import (
     CampaignCreate,
     CampaignRead,
     CampaignStatus,
     ContactRead,
-    SendJobRead,
     LeadSubmissionCreate,
     LeadSubmissionRead,
     LeadSubmissionResponse,
+    SendJobRead,
 )
-
-from .routers.settings_smtp import router as settings_smtp_router
-from .routers.settings_general import router as settings_general_router
-from .routers.settings_api_keys import router as settings_api_keys_router
-from .routers.settings_billing import router as settings_billing_router
-from .routers.settings_domain import router as settings_domain_router
-
-from .deps import verify_api_key
-
 
 # ============================================================
 # INITIALISATION APP / DB / CONFIG
 # ============================================================
 
 settings = get_settings()
-
 Base.metadata.create_all(bind=engine)
-
-
-
-# print("TABLES:", Base.metadata.tables.keys())
-# print("DATABASE_URL:", settings.DATABASE_URL)
-
 
 app = FastAPI(title="Email Marketing API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # À restreindre en production
+    allow_origins=["*"],  # A restreindre en production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -92,10 +74,10 @@ app.include_router(settings_api_keys_router)
 app.include_router(settings_billing_router)
 app.include_router(settings_domain_router)
 
-
 # ============================================================
 # SCHÉMAS LOCAUX
 # ============================================================
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -112,9 +94,36 @@ class SendEmailToAllRequest(BaseModel):
     body: str
 
 
+class UnsubscribeRequest(BaseModel):
+    email: EmailStr
+    reason: str | None = None
+
+
+class LinkVariantCreate(BaseModel):
+    url: str
+    weight: int = 100
+    is_active: bool = True
+
+
+# ============================================================
+# ROUTES UTILES
+# ============================================================
+
+
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "Email Marketing API"}
+
+
+@app.get("/health")
+def health():
+    return {"healthy": True}
+
+
 # ============================================================
 # HELPERS
 # ============================================================
+
 
 def split_full_name(full_name: str) -> tuple[str | None, str | None]:
     if not full_name:
@@ -142,6 +151,7 @@ def parse_datetime_safe(value: str | None) -> datetime | None:
 # AUTHENTIFICATION
 # ============================================================
 
+
 @app.post("/auth/login", response_model=LoginResponse)
 def login(payload: LoginRequest) -> LoginResponse:
     if (
@@ -156,6 +166,7 @@ def login(payload: LoginRequest) -> LoginResponse:
 # ============================================================
 # CONTACTS
 # ============================================================
+
 
 @app.get("/contacts", response_model=List[ContactRead])
 def list_contacts(
@@ -188,17 +199,12 @@ def list_contact_submissions(
 # LEADS / LANDING PAGES
 # ============================================================
 
+
 @app.post("/leads", response_model=LeadSubmissionResponse)
 def create_lead_submission(
     payload: LeadSubmissionCreate,
     db: Session = Depends(get_db),
 ):
-    """
-    Route publique pour capter un lead depuis une landing page.
-    Logique :
-    - email unique dans contacts
-    - plusieurs soumissions possibles dans lead_submissions
-    """
     contact = db.query(Contact).filter(Contact.email == payload.email).first()
 
     if not contact:
@@ -254,6 +260,7 @@ def create_lead_submission(
 # ENVOYER À TOUS
 # ============================================================
 
+
 @app.post("/emails/send-to-all")
 def send_email_to_all(
     payload: SendEmailToAllRequest,
@@ -263,7 +270,7 @@ def send_email_to_all(
     campaign = Campaign(
         subject=payload.subject,
         html=payload.body,
-        from_code="DEFAULT",
+        from_code="sendgrid",  # correction principale
     )
     db.add(campaign)
     db.commit()
@@ -283,8 +290,9 @@ def send_email_to_all(
         )
         .all()
     )
-    for j in jobs:
-        jobs_service.enqueue_send_job(j.id)
+
+    for job in jobs:
+        jobs_service.enqueue_send_job(job.id)
 
     return {
         "campaign_id": campaign.id,
@@ -296,6 +304,7 @@ def send_email_to_all(
 # ============================================================
 # CAMPAGNES
 # ============================================================
+
 
 @app.post("/campaigns/create", response_model=CampaignRead)
 def create_campaign(
@@ -317,6 +326,7 @@ def create_campaign(
 # ============================================================
 # IMPORT CONTACTS CSV
 # ============================================================
+
 
 @app.post("/contacts/import", response_model=List[ContactRead])
 async def import_contacts(
@@ -391,8 +401,8 @@ async def import_contacts(
 
     db.commit()
 
-    for c in created_contacts:
-        db.refresh(c)
+    for contact in created_contacts:
+        db.refresh(contact)
 
     return created_contacts
 
@@ -400,6 +410,7 @@ async def import_contacts(
 # ============================================================
 # QUEUE / JOBS
 # ============================================================
+
 
 @app.post("/queue/enqueue/one", response_model=SendJobRead)
 def enqueue_one_job(
@@ -469,8 +480,8 @@ def enqueue_campaign_jobs(
     if not jobs:
         return {"campaign_id": campaign_id, "enqueued": 0}
 
-    for j in jobs:
-        jobs_service.enqueue_send_job(j.id)
+    for job in jobs:
+        jobs_service.enqueue_send_job(job.id)
 
     return {"campaign_id": campaign_id, "enqueued": len(jobs)}
 
@@ -516,20 +527,22 @@ def retry_failed_jobs(
         .all()
     )
 
-    for j in failed_jobs:
-        j.state = SendJobState.PENDING
-        j.error_at = None
-        j.error_message = None
-        db.add(j)
+    for job in failed_jobs:
+        job.state = SendJobState.PENDING
+        job.error_at = None
+        job.error_message = None
+        db.add(job)
         db.flush()
-        jobs_service.enqueue_send_job(j.id)
+        jobs_service.enqueue_send_job(job.id)
 
     db.commit()
     return {"campaign_id": campaign_id, "retried": len(failed_jobs)}
 
+
 # ============================================================
 # UNSUBSCRIBE
 # ============================================================
+
 
 @app.get("/unsubscribe/{email}")
 def unsubscribe_get(email: str, db: Session = Depends(get_db)):
@@ -549,11 +562,6 @@ def unsubscribe_get(email: str, db: Session = Depends(get_db)):
         "message": "Email unsubscribed successfully",
         "email": email,
     }
-
-
-class UnsubscribeRequest(BaseModel):
-    email: EmailStr
-    reason: str | None = None
 
 
 @app.post("/unsubscribe")
@@ -582,6 +590,7 @@ def unsubscribe_post(payload: UnsubscribeRequest, db: Session = Depends(get_db))
 # ============================================================
 # LOGS
 # ============================================================
+
 
 @app.get("/logs")
 def list_logs(
@@ -612,10 +621,12 @@ def list_logs(
         }
         for job in jobs
     ]
-# ===========================================
+
+
 # ============================================================
 # EXPORT CONTACTS CSV
 # ============================================================
+
 
 @app.get("/contacts/export")
 def export_contacts_csv(
@@ -627,41 +638,43 @@ def export_contacts_csv(
     output = io.StringIO()
     writer = csv.writer(output)
 
-    writer.writerow([
-        "id",
-        "email",
-        "first_name",
-        "last_name",
-        "language",
-        "created_at",
-    ])
+    writer.writerow(
+        [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "language",
+            "created_at",
+        ]
+    )
 
     for contact in contacts:
-        writer.writerow([
-            contact.id,
-            contact.email,
-            contact.first_name or "",
-            contact.last_name or "",
-            contact.language or "",
-            contact.created_at.isoformat() if contact.created_at else "",
-        ])
+        writer.writerow(
+            [
+                contact.id,
+                contact.email,
+                contact.first_name or "",
+                contact.last_name or "",
+                contact.language or "",
+                contact.created_at.isoformat() if contact.created_at else "",
+            ]
+        )
 
     output.seek(0)
-
     filename = f"contacts_export_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
 
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        },
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
 # ============================================================
 # LINK ROTATOR / CLICK TRACKING
 # ============================================================
+
 
 @app.get("/r/{link_id}")
 def redirect_tracked_link(
@@ -721,12 +734,6 @@ def create_campaign_link(
         "label": link.label,
         "original_url": link.original_url,
     }
-
-
-class LinkVariantCreate(BaseModel):
-    url: str
-    weight: int = 100
-    is_active: bool = True
 
 
 @app.post("/links/{link_id}/variants")
@@ -816,6 +823,7 @@ def get_campaign_clicks(
         "campaign_id": campaign_id,
         "links": results,
     }
+
 
 
 
