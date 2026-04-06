@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import List
 
 import requests
@@ -11,13 +12,8 @@ from sqlalchemy.orm import Session
 
 from . import email_utils
 from .config import get_settings
-from .models import SettingsSMTP
 
 settings = get_settings()
-
-
-def _get_smtp_settings(db: Session) -> SettingsSMTP | None:
-    return db.query(SettingsSMTP).order_by(SettingsSMTP.id.asc()).first()
 
 
 def _dedupe_keep_order(items: List[str]) -> List[str]:
@@ -32,7 +28,7 @@ def _dedupe_keep_order(items: List[str]) -> List[str]:
 
 def _build_provider_order(default_provider: str | None, sender_code: str | None) -> List[str]:
     sender_code = (sender_code or "").strip().lower()
-    default_provider = (default_provider or "gmail").strip().lower()
+    default_provider = (default_provider or "ses").strip().lower()
 
     if sender_code in {"gmail", "smtp", "sendgrid", "ses"}:
         primary = sender_code
@@ -42,12 +38,12 @@ def _build_provider_order(default_provider: str | None, sender_code: str | None)
     fallback = {
         "gmail": ["gmail", "sendgrid", "ses"],
         "smtp": ["smtp", "sendgrid", "ses"],
-        "sendgrid": ["sendgrid", "gmail", "ses"],
+        "sendgrid": ["sendgrid", "ses", "gmail"],
         "ses": ["ses", "sendgrid", "gmail"],
     }
 
     return _dedupe_keep_order(
-        fallback.get(primary, [default_provider, "sendgrid", "ses"])
+        fallback.get(primary, [default_provider, "sendgrid", "gmail"])
     )
 
 
@@ -132,47 +128,49 @@ def _send_via_ses(
     subject: str,
     html: str,
 ) -> dict:
-    smtp_settings = _get_smtp_settings(db)
-    if not smtp_settings:
-        raise RuntimeError("SES settings not configured")
-
-    if not all(
-        [
-            smtp_settings.ses_region,
-            smtp_settings.ses_access_key_id,
-            smtp_settings.ses_secret_access_key,
-            smtp_settings.from_email,
-        ]
-    ):
-        raise RuntimeError("Amazon SES settings are incomplete")
-
     try:
         import boto3
     except ImportError as exc:
         raise RuntimeError("boto3 is required for SES") from exc
 
-    print(f"[SES] to={to}, from={smtp_settings.from_email}, region={smtp_settings.ses_region}")
+    aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+    aws_region = os.getenv("AWS_REGION", "us-east-1")
+    from_email = os.getenv("SES_FROM_EMAIL", "contact@ibcb-a.com")
+    from_name = os.getenv("SENDER_NAME", "iBCB")
+
+    if not aws_access_key:
+        raise RuntimeError("AWS_ACCESS_KEY_ID missing")
+    if not aws_secret_key:
+        raise RuntimeError("AWS_SECRET_ACCESS_KEY missing")
+    if not from_email:
+        raise RuntimeError("SES_FROM_EMAIL missing")
+
+    print(f"[SES] to={to}")
+    print(f"[SES] from={from_email}")
+    print(f"[SES] region={aws_region}")
 
     client = boto3.client(
         "ses",
-        region_name=smtp_settings.ses_region,
-        aws_access_key_id=smtp_settings.ses_access_key_id,
-        aws_secret_access_key=smtp_settings.ses_secret_access_key,
+        region_name=aws_region,
+        aws_access_key_id=aws_access_key,
+        aws_secret_access_key=aws_secret_key,
     )
 
     response = client.send_email(
-        Source=smtp_settings.from_email,
+        Source=f"{from_name} <{from_email}>",
         Destination={"ToAddresses": [to]},
         Message={
-            "Subject": {"Data": subject},
+            "Subject": {"Data": subject, "Charset": "UTF-8"},
             "Body": {
-                "Html": {"Data": html},
+                "Html": {"Data": html, "Charset": "UTF-8"},
             },
         },
     )
 
     message_id = response.get("MessageId")
     print(f"[SES] message_id={message_id}")
+
     return {"provider": "ses", "message": "sent", "message_id": message_id}
 
 
@@ -183,8 +181,8 @@ def send_email_with_fallback(
     html: str,
     sender_code: str | None = None,
 ) -> dict:
-    # Temporairement forcé pour les tests
-    default_provider = "sendgrid"
+    # Forcé temporairement pour les tests SES
+    default_provider = "ses"
 
     provider_order = _build_provider_order(default_provider, sender_code)
     print(f"[EMAIL ROUTER] sender_code={sender_code}, provider_order={provider_order}")
@@ -226,5 +224,6 @@ def send_email_with_fallback(
             print(f"[EMAIL ROUTER ERROR] {last_error}")
 
     raise RuntimeError(last_error or "All providers failed")
+
 
 
