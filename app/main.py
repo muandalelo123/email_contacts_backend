@@ -270,7 +270,7 @@ def send_email_to_all(
     campaign = Campaign(
         subject=payload.subject,
         html=payload.body,
-        from_code="sendgrid",  # correction principale
+        from_code="ses",  # corrigé : on force Amazon SES
     )
     db.add(campaign)
     db.commit()
@@ -823,6 +823,7 @@ def get_campaign_clicks(
         "campaign_id": campaign_id,
         "links": results,
     }
+
 
 
 
