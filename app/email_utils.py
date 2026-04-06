@@ -125,3 +125,9 @@ def send_email(to: str, subject: str, html: str, sender_code: str) -> None:
         _send_via_smtp(to, subject, html)
 
 
+
+
+
+
+
+

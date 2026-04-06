@@ -13,6 +13,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     API_KEY: str = Field(default="dev-ibcb-secret-key")
 
+    AWS_ACCESS_KEY_ID: str | None = None
+    AWS_SECRET_ACCESS_KEY: str | None = None
+    AWS_REGION: str | None = None
+    SES_FROM_EMAIL: str | None = None
+
+    # class Config:
+    #    env_file = ".env"
+    #    extra = "ignore"
+
+
+
     DATABASE_URL: AnyUrl
     REDIS_URL: AnyUrl = "redis://redis:6379/0"
 
