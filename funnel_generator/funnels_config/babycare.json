@@ -1,0 +1,23 @@
+{
+  "funnel_id": "babycare",
+  "funnel_name": "Baby Care",
+  "category_name": "Baby Care & Family",
+  "guide_title": "Baby Care Guide",
+  "headline": "Essential Baby Care Tips for New Parents",
+  "subtitle": "Download your free Baby Care guide and discover simple tips to care for your baby with confidence.",
+  "cta_text": "Download the Free Guide",
+  "pdf_en_url": "https://ibcb-a.com/bcb1_pdf/BabyCare_Guide_EN_Final.pdf",
+  "pdf_fr_url": "https://ibcb-a.com/bcb1_pdf/BabyCare_Guide_FR_Final.pdf",
+  "product_category_url": "https://ibcb-a.com/product-category/baby-care/",
+  "primary_color": "#0B3D91",
+  "secondary_color": "#D4AF37",
+  "hero_image": "assets/babycare-hero.jpg",
+  "email_subject_en": "Your Free Baby Care Guide",
+  "email_subject_fr": "Votre guide gratuit Baby Care",
+  "email_body_en": "Thank you for requesting your free Baby Care guide. You can download it using the link below.",
+  "email_body_fr": "Merci d’avoir demandé votre guide gratuit Baby Care. Vous pouvez le télécharger avec le lien ci-dessous.",
+  "utm_campaign": "babycare_guide",
+  "language_default": "en",
+  "status": "active",
+  "lead_capture_url": "https://ibcb-s.com/api/save_lead.php"
+}
