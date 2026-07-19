@@ -9,6 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CONFIG_DIR = BASE_DIR / "funnels_config"
 TEMPLATE_DIR = BASE_DIR / "templates"
 GENERATED_DIR = BASE_DIR / "generated"
+PUBLISH_DIR = BASE_DIR / "publish"
 
 REQUIRED_FIELDS = [
     "funnel_id",
@@ -32,6 +33,14 @@ TEMPLATE_FILES = {
     "thank-you.html": "thankyou_template.html",
     "email.html": "email_template.html",
     "config_block.php": "config_template.php",
+}
+
+
+PUBLISH_FILE_KEYS = {
+    "index.html": "landing_filename",
+    "thank-you.html": "thankyou_filename",
+    "email.html": "email_filename",
+    "config_block.php": "config_filename",
 }
 
 
@@ -103,32 +112,51 @@ def render_template(template_content: str, replacements: dict) -> str:
     return rendered
 
 
+def render_file(template_filename: str, output_path: Path, replacements: dict) -> None:
+    template_path = TEMPLATE_DIR / template_filename
+
+    if not template_path.exists():
+        raise FileNotFoundError(f"Template file not found: {template_path}")
+
+    template_content = template_path.read_text(encoding="utf-8")
+    rendered_content = render_template(template_content, replacements)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(rendered_content, encoding="utf-8")
+
+
 def generate_funnel(funnel_id: str) -> None:
     config = load_config(funnel_id)
     validate_config(config)
 
-    output_dir = GENERATED_DIR / config["funnel_id"]
+    funnel_id = config["funnel_id"]
+    replacements = build_replacements(config)
+
+    output_dir = GENERATED_DIR / funnel_id
     assets_dir = output_dir / "assets"
 
     output_dir.mkdir(parents=True, exist_ok=True)
     assets_dir.mkdir(parents=True, exist_ok=True)
 
-    replacements = build_replacements(config)
-
     generated_files = []
 
     for output_filename, template_filename in TEMPLATE_FILES.items():
-        template_path = TEMPLATE_DIR / template_filename
         output_path = output_dir / output_filename
-
-        if not template_path.exists():
-            raise FileNotFoundError(f"Template file not found: {template_path}")
-
-        template_content = template_path.read_text(encoding="utf-8")
-        rendered_content = render_template(template_content, replacements)
-
-        output_path.write_text(rendered_content, encoding="utf-8")
+        render_file(template_filename, output_path, replacements)
         generated_files.append(output_path)
+
+    publish_folder = config.get("publish_folder", f"{funnel_id}_v2")
+    publish_dir = PUBLISH_DIR / publish_folder
+
+    publish_files = []
+
+    for default_output_filename, template_filename in TEMPLATE_FILES.items():
+        filename_key = PUBLISH_FILE_KEYS[default_output_filename]
+        publish_filename = config.get(filename_key, default_output_filename)
+        publish_path = publish_dir / publish_filename
+
+        render_file(template_filename, publish_path, replacements)
+        publish_files.append(publish_path)
 
     print("Funnel generated successfully.")
     print()
@@ -139,6 +167,12 @@ def generate_funnel(funnel_id: str) -> None:
     print("Generated files:")
 
     for file_path in generated_files:
+        print(f"- {file_path.relative_to(BASE_DIR)}")
+
+    print()
+    print("Publish-ready files:")
+
+    for file_path in publish_files:
         print(f"- {file_path.relative_to(BASE_DIR)}")
 
 

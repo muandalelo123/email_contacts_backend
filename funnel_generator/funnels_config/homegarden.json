@@ -24,5 +24,10 @@
   "brand_name": "iBCB",
   "logo_url": "",
   "hero_image_url": "",
-  "guide_cover_url": "https://ibcb-a.com/bcb1_pdf/Home_Garden/Home_Garden_Images/Home_Garden_cover.png"
+  "guide_cover_url": "https://ibcb-a.com/bcb1_pdf/Home_Garden/Home_Garden_Images/Home_Garden_cover.png",
+  "publish_folder": "homegarden_v2",
+  "landing_filename": "home_garden_landing.html",
+  "thankyou_filename": "home_garden_thankyou.html",
+  "email_filename": "home_garden_email.html",
+  "config_filename": "home_garden_config_block.php"
 }
