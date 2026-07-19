@@ -87,6 +87,10 @@ def build_replacements(config: dict) -> dict:
         "{{STATUS}}": config.get("status", "draft"),
         "{{LEAD_CAPTURE_URL}}": config.get("lead_capture_url", ""),
         "{{THANKYOU_URL}}": config.get("thankyou_url", ""),
+        "{{BRAND_NAME}}": config.get("brand_name", "iBCB"),
+        "{{LOGO_URL}}": config.get("logo_url", ""),
+        "{{HERO_IMAGE_URL}}": config.get("hero_image_url", ""),
+        "{{GUIDE_COVER_URL}}": config.get("guide_cover_url", ""),
     }
 
 

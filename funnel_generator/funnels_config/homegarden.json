@@ -6,8 +6,8 @@
   "headline": "Simple Ideas to Make Your Home More Comfortable",
   "subtitle": "Download your free Home & Garden guide and discover practical ideas to improve your home, garden, and daily living space.",
   "cta_text": "Download the Free Guide",
-  "pdf_en_url": "https://ibcb-a.com/bcb1_pdf/home_garden_guide_E.pdf",
-  "pdf_fr_url": "https://ibcb-a.com/bcb1_pdf/home_garden_guide_FR1.pdf",
+  "pdf_en_url": "https://ibcb-a.com/bcb1_pdf/Home_Garden/home_garden_guide_E.pdf",
+  "pdf_fr_url": "https://ibcb-a.com/bcb1_pdf/Home_Garden/home_garden_guide_FR1.pdf",
   "product_category_url": "https://ibcb-a.com/product-category/home-garden/",
   "primary_color": "#0B3D91",
   "secondary_color": "#D4AF37",
@@ -20,5 +20,9 @@
   "language_default": "en",
   "status": "draft",
   "lead_capture_url": "https://ibcb-s.com/api/save_lead_v2.php",
-  "thankyou_url": "https://ibcb-s.com/BCB_CAMPAIGN1/Home_Garden_v2/home_garden_thankyou.html"
+  "thankyou_url": "https://ibcb-s.com/BCB_CAMPAIGN1/Home_Garden_v2/home_garden_thankyou.html",
+  "brand_name": "iBCB",
+  "logo_url": "",
+  "hero_image_url": "",
+  "guide_cover_url": "https://ibcb-a.com/bcb1_pdf/Home_Garden/Home_Garden_Images/Home_Garden_cover.png"
 }
