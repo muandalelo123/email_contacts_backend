@@ -72,8 +72,47 @@ def validate_config(config: dict) -> None:
     validate_funnel_id(config["funnel_id"])
 
 
+def build_featured_products_html(config: dict) -> str:
+    products = config.get("featured_products", [])
+
+    if not products:
+        return ""
+
+    cards = []
+
+    for product in products[:4]:
+        title = product.get("title", "")
+        description = product.get("description", "")
+        image_url = product.get("image_url", "")
+        product_url = product.get("product_url", config.get("product_category_url", "#"))
+
+        image_html = ""
+        if image_url:
+            image_html = f'<img src="{image_url}" alt="{title}" />'
+        else:
+            image_html = '<div class="product-image-placeholder">Home & Garden</div>'
+
+        cards.append(f"""
+          <article class="product-card">
+            <div class="product-image">
+              {image_html}
+            </div>
+            <div class="product-content">
+              <h3>{title}</h3>
+              <p>{description}</p>
+              <a href="{product_url}" target="_blank" rel="noopener">View product</a>
+            </div>
+          </article>
+        """)
+
+    return "\n".join(cards)
+
+
 def build_replacements(config: dict) -> dict:
     return {
+        "{{FEATURED_SECTION_TITLE}}": config.get("featured_section_title", "Featured Picks"),
+        "{{FEATURED_SECTION_SUBTITLE}}": config.get("featured_section_subtitle", ""),
+        "{{FEATURED_PRODUCTS_HTML}}": build_featured_products_html(config),
         "{{FUNNEL_ID}}": config.get("funnel_id", ""),
         "{{FUNNEL_NAME}}": config.get("funnel_name", ""),
         "{{CATEGORY_NAME}}": config.get("category_name", ""),

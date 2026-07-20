@@ -29,5 +29,33 @@
   "landing_filename": "home_garden_landing.html",
   "thankyou_filename": "home_garden_thankyou.html",
   "email_filename": "home_garden_email.html",
-  "config_filename": "home_garden_config_block.php"
+  "config_filename": "home_garden_config_block.php",
+  "featured_section_title": "Featured Home & Garden Picks",
+  "featured_section_subtitle": "Explore a few curated product ideas to improve your home, garden, and everyday comfort.",
+  "featured_products": [
+    {
+      "title": "2-Tier Dish Drying Rack",
+      "description": "Keep your kitchen counter organized with a practical drying rack for dishes, utensils, and cutting boards.",
+      "image_url": "",
+      "product_url": "https://ibcb-a.com/product-category/home-garden/"
+    },
+    {
+      "title": "Repotting Mat",
+      "description": "A simple gardening accessory for clean indoor and outdoor plant care.",
+      "image_url": "",
+      "product_url": "https://ibcb-a.com/product-category/home-garden/"
+    },
+    {
+      "title": "Garden Pruner Set",
+      "description": "Useful tools for trimming herbs, flowers, small plants, and garden branches.",
+      "image_url": "",
+      "product_url": "https://ibcb-a.com/product-category/home-garden/"
+    },
+    {
+      "title": "Outdoor String Lights",
+      "description": "Create a cozy outdoor atmosphere for patios, balconies, and garden evenings.",
+      "image_url": "",
+      "product_url": "https://ibcb-a.com/product-category/home-garden/"
+    }
+  ]
 }

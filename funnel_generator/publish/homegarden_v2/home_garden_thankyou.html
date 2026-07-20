@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Thank You | Home & Garden Guide | iBCB</title>
-  <meta name="description" content="Thank you for requesting Home & Garden Guide.">
+  <title>Thank You | Home & Garden Guide</title>
 
   <style>
     :root {
       --primary-color: #0B3D91;
       --secondary-color: #D4AF37;
-      --dark-color: #111827;
-      --light-color: #f9fafb;
-      --text-color: #374151;
+      --dark-color: #1f2937;
+      --light-bg: #f7f4ee;
+      --card-bg: rgba(255, 255, 255, 0.94);
     }
 
     * {
@@ -23,140 +22,476 @@
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: var(--light-color);
-      color: var(--text-color);
+      color: var(--dark-color);
+      background:
+        radial-gradient(circle at top left, rgba(212, 175, 55, 0.22), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(11, 61, 145, 0.16), transparent 30%),
+        linear-gradient(135deg, #f7f4ee 0%, #eef4ec 50%, #f9fafb 100%);
+      min-height: 100vh;
     }
 
     .page {
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
+      padding: 48px 20px;
     }
 
-    .card {
+    .thankyou-card {
       width: 100%;
-      max-width: 760px;
-      background: #ffffff;
-      border-radius: 24px;
-      padding: 50px;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 34px;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      border-radius: 34px;
+      padding: 42px;
+      box-shadow:
+        0 34px 90px rgba(31, 41, 55, 0.18),
+        inset 0 1px 0 rgba(255,255,255,0.75);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .thankyou-card::before {
+      content: "";
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      background: rgba(212, 175, 55, 0.13);
+      right: -120px;
+      top: -150px;
     }
 
     .brand {
-      font-size: 28px;
-      font-weight: 700;
-      font-style: italic;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
       color: var(--primary-color);
-      margin-bottom: 24px;
+      margin-bottom: 22px;
+      letter-spacing: 0.4px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 10px 24px rgba(11, 61, 145, 0.24);
     }
 
     .badge {
-      display: inline-block;
-      background: rgba(212, 175, 55, 0.14);
-      color: var(--dark-color);
-      padding: 8px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(212, 175, 55, 0.16);
+      color: #735c13;
+      border: 1px solid rgba(212, 175, 55, 0.36);
+      padding: 9px 14px;
       border-radius: 999px;
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 800;
       margin-bottom: 20px;
     }
 
     h1 {
-      font-size: 42px;
-      line-height: 1.12;
+      margin: 0;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 1.02;
+      letter-spacing: -1.8px;
       color: var(--dark-color);
-      margin: 0 0 18px;
     }
 
-    p {
+    .highlight {
+      color: var(--primary-color);
+    }
+
+    .intro {
+      margin: 22px 0 0;
       font-size: 18px;
-      line-height: 1.6;
-      margin: 0 0 26px;
+      line-height: 1.7;
+      color: #4b5563;
+      max-width: 620px;
     }
 
-    .buttons {
-      display: grid;
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
       gap: 14px;
-      max-width: 420px;
-      margin: 32px auto 0;
+      margin-top: 30px;
     }
 
-    a.button {
-      display: block;
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 52px;
+      padding: 15px 22px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 900;
       text-decoration: none;
-      border-radius: 12px;
-      padding: 16px 20px;
-      font-size: 17px;
-      font-weight: 700;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .primary {
-      color: #ffffff;
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
       background: var(--primary-color);
+      color: #fff;
+      box-shadow: 0 18px 38px rgba(11, 61, 145, 0.26);
     }
 
-    .secondary {
-      color: var(--dark-color);
-      background: rgba(212, 175, 55, 0.18);
-      border: 1px solid rgba(212, 175, 55, 0.35);
-    }
-
-    .store {
-      color: #ffffff;
+    .btn-secondary {
       background: var(--secondary-color);
+      color: #1f2937;
+      box-shadow: 0 18px 38px rgba(212, 175, 55, 0.26);
     }
 
-    .small-note {
-      font-size: 13px;
+    .btn-outline {
+      background: #fff;
+      color: var(--primary-color);
+      border: 1px solid rgba(11, 61, 145, 0.18);
+      box-shadow: 0 14px 30px rgba(31, 41, 55, 0.08);
+    }
+
+    .note {
+      margin-top: 22px;
       color: #6b7280;
-      margin-top: 28px;
+      font-size: 14px;
+      line-height: 1.6;
     }
 
-    @media (max-width: 640px) {
-      .card {
-        padding: 34px 24px;
+    .visual {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 520px;
+    }
+
+    .cover-wrap {
+      width: min(350px, 90%);
+      border: 8px solid rgba(255,255,255,0.96);
+      border-radius: 24px;
+      overflow: hidden;
+      background: #f6efe4;
+      box-shadow:
+        0 36px 72px rgba(0, 0, 0, 0.28),
+        24px 24px 0 rgba(212, 175, 55, 0.18);
+      transform: rotate(3deg);
+      animation: floatCover 4.8s ease-in-out infinite;
+    }
+
+    @keyframes floatCover {
+      0%, 100% {
+        transform: rotate(3deg) translateY(0);
+      }
+      50% {
+        transform: rotate(2deg) translateY(-14px);
+      }
+    }
+
+    .cover-wrap img {
+      width: 100%;
+      display: block;
+    }
+
+    .next-step {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 22px;
+      background: rgba(11, 61, 145, 0.06);
+      border: 1px solid rgba(11, 61, 145, 0.10);
+    }
+
+    .next-step strong {
+      color: var(--primary-color);
+    }
+
+    .next-step p {
+      margin: 8px 0 0;
+      color: #4b5563;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .products-section {
+      width: 100%;
+      max-width: 1120px;
+      margin: 34px auto 0;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.76);
+      border-radius: 30px;
+      padding: 34px;
+      box-shadow: 0 28px 70px rgba(31, 41, 55, 0.13);
+    }
+
+    .products-header {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 28px;
+    }
+
+    .products-header h2 {
+      margin: 0;
+      color: var(--dark-color);
+      font-size: clamp(26px, 3vw, 40px);
+      letter-spacing: -1px;
+    }
+
+    .products-header p {
+      margin: 12px 0 0;
+      color: #5b6472;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .product-card {
+      background: #fff;
+      border: 1px solid rgba(31, 41, 55, 0.08);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(31, 41, 55, 0.10);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 50px rgba(31, 41, 55, 0.14);
+    }
+
+    .product-image {
+      height: 150px;
+      background:
+        linear-gradient(135deg, rgba(11, 61, 145, 0.08), rgba(212, 175, 55, 0.16)),
+        #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .product-image-placeholder {
+      color: var(--primary-color);
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 0.4px;
+      text-align: center;
+      padding: 18px;
+    }
+
+    .product-content {
+      padding: 18px;
+    }
+
+    .product-content h3 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.25;
+      color: var(--dark-color);
+    }
+
+    .product-content p {
+      margin: 10px 0 16px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #5b6472;
+    }
+
+    .product-content a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 42px;
+      border-radius: 999px;
+      background: rgba(11, 61, 145, 0.08);
+      color: var(--primary-color);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 900;
+      border: 1px solid rgba(11, 61, 145, 0.12);
+    }
+
+    @media (max-width: 980px) {
+      .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .thankyou-card {
+        grid-template-columns: 1fr;
+        padding: 28px;
       }
 
-      h1 {
-        font-size: 32px;
+      .visual {
+        min-height: auto;
+        padding-top: 18px;
+      }
+
+      .cover-wrap {
+        width: min(280px, 88%);
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .products-section {
+        padding: 24px;
+      }
+
+      .products-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
+
 <body>
   <main class="page">
-    <section class="card">
-      <div class="brand">iBCB</div>
+    <section class="thankyou-card">
+      <div class="content">
+        <div class="brand">
+          <span class="brand-mark">iBCB</span>
+          <span>iBCB</span>
+        </div>
 
-      <div class="badge">Home & Garden</div>
+        <div class="badge">Your guide is ready</div>
 
-      <h1>Thank you!</h1>
+        <h1>
+          Thank you.<br />
+          Your <span class="highlight">Home & Garden Guide</span> is ready.
+        </h1>
 
-      <p>
-        Your free <strong>Home & Garden Guide</strong> is ready.
-        You can download it below.
-      </p>
+        <p class="intro">
+          You can download your free guide below. We also sent the guide link to your email so you can access it later.
+        </p>
 
-      <div class="buttons">
-        <a class="button primary" href="https://ibcb-a.com/bcb1_pdf/Home_Garden/home_garden_guide_E.pdf" target="_blank" rel="noopener">
-          Download English Guide
-        </a>
+        <div class="actions">
+          <a class="btn btn-primary" href="https://ibcb-a.com/bcb1_pdf/Home_Garden/home_garden_guide_E.pdf" target="_blank" rel="noopener">
+            Download English Guide
+          </a>
 
-        <a class="button secondary" href="https://ibcb-a.com/bcb1_pdf/Home_Garden/home_garden_guide_FR1.pdf" target="_blank" rel="noopener">
-          Télécharger le guide français
-        </a>
+          <a class="btn btn-secondary" href="https://ibcb-a.com/bcb1_pdf/Home_Garden/home_garden_guide_FR1.pdf" target="_blank" rel="noopener">
+            Télécharger le guide français
+          </a>
 
-        <a class="button store" href="https://ibcb-a.com/product-category/home-garden/" target="_blank" rel="noopener">
-          Visit Home & Garden Products
-        </a>
+          <a class="btn btn-outline" href="https://ibcb-a.com/product-category/home-garden/" target="_blank" rel="noopener">
+            Explore Home & Garden Picks
+          </a>
+        </div>
+
+        <div class="next-step">
+          <strong>Next step:</strong>
+          <p>
+            Explore curated Home & Garden ideas and product selections from iBCB to improve your living space, garden, and everyday comfort.
+          </p>
+        </div>
+
+        <p class="note">
+          If a download does not open, right-click the button and choose “Open Link in New Tab”.
+        </p>
       </div>
 
-      <p class="small-note">
-        Campaign: homegarden_guide
-      </p>
+      <div class="visual">
+        <div class="cover-wrap">
+          <img src="https://ibcb-a.com/bcb1_pdf/Home_Garden/Home_Garden_Images/Home_Garden_cover.png" alt="Home & Garden Guide" />
+        </div>
+      </div>
+    </section>
+
+    <section class="products-section">
+      <div class="products-header">
+        <h2>Featured Home & Garden Picks</h2>
+        <p>Explore a few curated product ideas to improve your home, garden, and everyday comfort.</p>
+      </div>
+
+      <div class="products-grid">
+
+          <article class="product-card">
+            <div class="product-image">
+              <div class="product-image-placeholder">Home & Garden</div>
+            </div>
+            <div class="product-content">
+              <h3>2-Tier Dish Drying Rack</h3>
+              <p>Keep your kitchen counter organized with a practical drying rack for dishes, utensils, and cutting boards.</p>
+              <a href="https://ibcb-a.com/product-category/home-garden/" target="_blank" rel="noopener">View product</a>
+            </div>
+          </article>
+        
+
+          <article class="product-card">
+            <div class="product-image">
+              <div class="product-image-placeholder">Home & Garden</div>
+            </div>
+            <div class="product-content">
+              <h3>Repotting Mat</h3>
+              <p>A simple gardening accessory for clean indoor and outdoor plant care.</p>
+              <a href="https://ibcb-a.com/product-category/home-garden/" target="_blank" rel="noopener">View product</a>
+            </div>
+          </article>
+        
+
+          <article class="product-card">
+            <div class="product-image">
+              <div class="product-image-placeholder">Home & Garden</div>
+            </div>
+            <div class="product-content">
+              <h3>Garden Pruner Set</h3>
+              <p>Useful tools for trimming herbs, flowers, small plants, and garden branches.</p>
+              <a href="https://ibcb-a.com/product-category/home-garden/" target="_blank" rel="noopener">View product</a>
+            </div>
+          </article>
+        
+
+          <article class="product-card">
+            <div class="product-image">
+              <div class="product-image-placeholder">Home & Garden</div>
+            </div>
+            <div class="product-content">
+              <h3>Outdoor String Lights</h3>
+              <p>Create a cozy outdoor atmosphere for patios, balconies, and garden evenings.</p>
+              <a href="https://ibcb-a.com/product-category/home-garden/" target="_blank" rel="noopener">View product</a>
+            </div>
+          </article>
+        
+      </div>
     </section>
   </main>
 </body>
