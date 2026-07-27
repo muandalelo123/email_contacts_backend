@@ -31,31 +31,31 @@
   "email_filename": "home_garden_email.html",
   "config_filename": "home_garden_config_block.php",
   "featured_section_title": "Featured Home & Garden Picks",
-  "featured_section_subtitle": "Explore a few curated product ideas to improve your home, garden, and everyday comfort.",
+  "featured_section_subtitle": "Explore selected Home & Garden products for outdoor comfort, decor, lighting, and backyard living.",
   "featured_products": [
     {
-      "title": "2-Tier Dish Drying Rack",
-      "description": "Keep your kitchen counter organized with a practical drying rack for dishes, utensils, and cutting boards.",
-      "image_url": "",
-      "product_url": "https://ibcb-a.com/product-category/home-garden/"
+      "title": "addlon 48 FT Outdoor String Lights",
+      "description": "Commercial-grade weatherproof Edison-style patio lights for gardens, bistros, patios, and outdoor evenings.",
+      "image_url": "https://ibcb-a.com/bcb1_pdf/Home_Garden/Home_Garden_Images/411GplrN2+L1.jpg",
+      "product_url": "https://ibcb-a.com/product/addlon-48-ft-outdoor-string-lights-commercial-grade-weatherproof-strand-edison-vintage-bulbs-15-hanging-sockets-ul-listed-heavy-duty-decorative-cafe-patio-lights-for-bistro-garden/"
     },
     {
-      "title": "Repotting Mat",
-      "description": "A simple gardening accessory for clean indoor and outdoor plant care.",
-      "image_url": "",
-      "product_url": "https://ibcb-a.com/product-category/home-garden/"
+      "title": "addlon 52 FT Solar String Lights",
+      "description": "Solar-powered waterproof patio lights with remote control, USB port, dimmable modes, and shatterproof bulbs.",
+      "image_url": "https://ibcb-a.com/bcb1_pdf/Home_Garden/Home_Garden_Images/51+ZNeZ+nfL2.jpg",
+      "product_url": "https://ibcb-a.com/product/addlon-52484-ft-solar-string-lights-waterproofpatio-lights-solar-powered-with-remote-usb-port-161-led-shatterproof-bulbs-3-light-modes-dimmable-solar-light-for-camping-backyard-garden/"
     },
     {
-      "title": "Garden Pruner Set",
-      "description": "Useful tools for trimming herbs, flowers, small plants, and garden branches.",
-      "image_url": "",
-      "product_url": "https://ibcb-a.com/product-category/home-garden/"
+      "title": "3D Wall Art Decor with LED Lights",
+      "description": "Decorative metal wall art with warm LED lighting for living rooms, bedrooms, entrances, and elegant home spaces.",
+      "image_url": "https://ibcb-a.com/bcb1_pdf/Home_Garden/Home_Garden_Images/41EGELiN6OL3.jpg",
+      "product_url": "https://ibcb-a.com/product/3d-wall-art-decor-with-led-lights-metal-creative-wall-art-decoration-with-warm-lights-large-family-hanging-sculpture-painting-china-for-living-room-bedroom-entranceo19-68x47-24in/"
     },
     {
-      "title": "Outdoor String Lights",
-      "description": "Create a cozy outdoor atmosphere for patios, balconies, and garden evenings.",
-      "image_url": "",
-      "product_url": "https://ibcb-a.com/product-category/home-garden/"
+      "title": "34,000 BTU 3-Burner Propane Gas Grill",
+      "description": "Stainless steel outdoor BBQ grill with side burner, cast iron grates, and portable cart for backyard cooking.",
+      "image_url": "https://ibcb-a.com/bcb1_pdf/Home_Garden/Home_Garden_Images/41jlMZt9EML4.jpg",
+      "product_url": "https://ibcb-a.com/product/34000-btu-3-burner-propane-gas-grill-with-side-burner-all-stainless-steel-bbq-grill-cast-iron-grates-portable-cart-with-wheels%ef%bc%8coutdoor-barbecue-grill-for-backyard-patio-camping-g31-pro/"
     }
   ]
 }
