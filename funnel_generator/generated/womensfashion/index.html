@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Women's Fashion Guide | iBCB</title>
+  <meta name="description" content="Download your free Women's Fashion guide and discover practical fashion ideas, outfit inspiration, and curated style picks.">
+
+  <style>
+    :root {
+      --primary-color: #7A1F4D;
+      --secondary-color: #D4AF37;
+      --dark-color: #111827;
+      --light-color: #f8fafc;
+      --text-color: #374151;
+      --muted-color: #6b7280;
+      --card-border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(212, 175, 55, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(11, 61, 145, 0.16), transparent 36%),
+        var(--light-color);
+      color: var(--text-color);
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 44px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1180px;
+      background: #ffffff;
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.16);
+      display: grid;
+      grid-template-columns: 1.02fr 0.98fr;
+      border: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .content {
+      padding: 58px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 34px;
+    }
+
+    .logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      object-fit: cover;
+      display: none;
+    }
+
+    .brand-name {
+      font-size: 29px;
+      font-weight: 800;
+      font-style: italic;
+      color: var(--primary-color);
+      letter-spacing: -0.5px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(212, 175, 55, 0.16);
+      color: var(--dark-color);
+      padding: 9px 15px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 22px;
+      border: 1px solid rgba(212, 175, 55, 0.28);
+    }
+
+    h1 {
+      font-size: 48px;
+      line-height: 1.05;
+      letter-spacing: -1.4px;
+      color: var(--dark-color);
+      margin: 0 0 20px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      line-height: 1.65;
+      margin: 0 0 32px;
+      color: #4b5563;
+      max-width: 560px;
+    }
+
+    .benefits {
+      display: grid;
+      gap: 10px;
+      margin: 0 0 32px;
+      padding: 0;
+      list-style: none;
+      color: #374151;
+      font-size: 15px;
+    }
+
+    .benefits li::before {
+      content: "✓";
+      color: var(--primary-color);
+      font-weight: 800;
+      margin-right: 9px;
+    }
+
+    .form-card {
+      max-width: 480px;
+      padding: 20px;
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      background: #ffffff;
+      box-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 13px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(11, 61, 145, 0.12);
+    }
+
+    button {
+      border: none;
+      border-radius: 13px;
+      padding: 16px 20px;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--primary-color), #123f86);
+      box-shadow: 0 14px 28px rgba(11, 61, 145, 0.22);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.96;
+    }
+
+    .small-note {
+      font-size: 13px;
+      color: var(--muted-color);
+      margin: 14px 0 0;
+      line-height: 1.5;
+    }
+
+    .visual {
+      position: relative;
+      background:
+        linear-gradient(145deg, rgba(11, 61, 145, 0.94), rgba(17, 24, 39, 0.96)),
+        var(--primary-color);
+      color: white;
+      padding: 54px 44px;
+      min-height: 650px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url('');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.18;
+    }
+
+    .visual::after {
+      content: "";
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 999px;
+      background: rgba(212, 175, 55, 0.22);
+      top: -80px;
+      right: -90px;
+      filter: blur(2px);
+    }
+
+    .premium-panel {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 430px;
+      text-align: center;
+    }
+
+    .cover-card {
+      margin: 0 auto 34px;
+      width: 310px;
+      min-height: 440px;
+      border-radius: 24px;
+      background: transparent;
+      color: var(--dark-color);
+      padding: 0;
+      box-shadow:
+        0 34px 70px rgba(0, 0, 0, 0.36),
+        22px 22px 0 rgba(212, 175, 55, 0.18);
+      transform: rotate(-4deg) translateY(-8px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 8px solid rgba(255,255,255,0.95);
+      overflow: hidden;
+      animation: floatCover 4.5s ease-in-out infinite;
+    }
+
+    @keyframes floatCover {
+      0%, 100% {
+        transform: rotate(-4deg) translateY(-8px);
+      }
+      50% {
+        transform: rotate(-3deg) translateY(-18px);
+      }
+    }
+
+    .cover-image {
+      width: 100%;
+      height: 100%;
+      min-height: 440px;
+      border-radius: 16px;
+      object-fit: contain;
+      background: #f6efe4;
+      display: none;
+      margin-bottom: 0;
+    }
+
+    .cover-label {
+      display: none;
+    }
+
+    .cover-title {
+      display: none;
+    }
+
+    .cover-footer {
+      display: none;
+    }
+
+    .guide-card {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 24px;
+      padding: 28px;
+      backdrop-filter: blur(10px);
+      text-align: left;
+    }
+
+    .guide-card h2 {
+      font-size: 28px;
+      margin: 0 0 12px;
+    }
+
+    .guide-card p {
+      font-size: 16px;
+      line-height: 1.65;
+      margin: 0;
+      color: rgba(255,255,255,0.88);
+    }
+
+    .category {
+      margin-top: 22px;
+      font-size: 14px;
+      opacity: 0.82;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      .content {
+        padding: 38px 24px;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+
+      .visual {
+        min-height: auto;
+        padding: 44px 24px;
+      }
+
+      .cover-card {
+        width: 250px;
+        min-height: 355px;
+      }
+
+      .cover-image {
+        min-height: 355px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="container">
+      <div class="content">
+        <div class="brand-row">
+          <img class="logo" src="" alt="iBCB logo" onload="this.style.display='block'" onerror="this.style.display='none'">
+          <div class="brand-name">iBCB</div>
+        </div>
+
+        <div class="badge">Women's Fashion</div>
+
+        <h1>Style Ideas to Elevate Your Everyday Look</h1>
+
+        <p class="subtitle">Download your free Women's Fashion guide and discover practical fashion ideas, outfit inspiration, and curated style picks.</p>
+
+        <ul class="benefits">
+          <li>Free practical guide delivered instantly</li>
+          <li>Simple ideas selected for everyday use</li>
+          <li>Helpful product recommendations included</li>
+        </ul>
+
+        <div class="form-card">
+          <form action="https://ibcb-s.com/api/save_lead_v2.php" method="POST">
+            <input type="hidden" name="funnel_id" value="womensfashion">
+            <input type="hidden" name="utm_campaign" value="womensfashion_guide">
+            <input type="hidden" name="source" value="landing_page">
+            <input type="hidden" name="language" value="en">
+            <input type="hidden" name="thankyou_url" value="https://ibcb-s.com/BCB_CAMPAIGN1/Womens_Fashion_v2/womens_fashion_thankyou_v2.html">
+
+            <input type="text" name="name" placeholder="Your name" required>
+            <input type="email" name="email" placeholder="Your email" required>
+
+            <button type="submit">Download the Free Guide</button>
+          </form>
+
+          <p class="small-note">
+            By submitting this form, you agree to receive the requested guide and related iBCB updates.
+          </p>
+        </div>
+      </div>
+
+      <div class="visual">
+        <div class="premium-panel">
+          <div class="cover-card">
+            <div>
+              <img class="cover-image" src="https://ibcb-a.com/bcb1_pdf/Women_Fashion_pdf/womens_images/Cover_Page_Women_Fashion_E.png" alt="Women's Fashion Guide" onload="this.style.display='block'" onerror="this.style.display='none'">
+              <div class="cover-label">Free Guide</div>
+              <div class="cover-title">Women's Fashion Guide</div>
+            </div>
+            <div class="cover-footer">iBCB • Women's Fashion</div>
+          </div>
+
+          <div class="guide-card">
+            <h2>Women's Fashion Guide</h2>
+            <p>Download your free Women's Fashion guide and discover practical fashion ideas, outfit inspiration, and curated style picks.</p>
+            <div class="category">Campaign: womensfashion_guide</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
