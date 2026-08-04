@@ -214,6 +214,15 @@ def generate_funnel(funnel_id: str) -> None:
     for file_path in publish_files:
         print(f"- {file_path.relative_to(BASE_DIR)}")
 
+    print()
+    print("Public URLs:")
+    print(f"- Landing page: {config.get('landing_public_url', '')}")
+    print(f"- Thank-you page: {config.get('thankyou_public_url', '')}")
+
+    print()
+    print("Server folder:")
+    print(f"- {config.get('server_folder', '')}")
+
 
 def main() -> None:
     if len(sys.argv) != 2:

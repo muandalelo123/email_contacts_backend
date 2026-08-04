@@ -1,0 +1,80 @@
+{
+  "funnel_id": "example",
+  "funnel_name": "Example Funnel",
+  "category_name": "Example Category",
+  "guide_title": "Example Guide",
+
+  "headline": "Main headline for the landing page",
+  "subtitle": "Short explanation of the free guide and why visitors should download it.",
+  "cta_text": "Download the Free Guide",
+
+  "brand_name": "iBCB",
+  "logo_url": "",
+  "hero_image_url": "",
+  "guide_cover_url": "",
+
+  "pdf_en_url": "",
+  "pdf_fr_url": "",
+  "product_category_url": "",
+
+  "primary_color": "#0B3D91",
+  "secondary_color": "#D4AF37",
+
+  "lead_capture_url": "https://ibcb-s.com/api/save_lead_v2.php",
+  "thankyou_url": "",
+
+  "utm_campaign": "example_guide",
+  "language_default": "en",
+  "status": "draft",
+
+  "publish_folder": "example_v2",
+  "landing_filename": "example_landing.html",
+  "thankyou_filename": "example_thankyou.html",
+  "email_filename": "example_email.html",
+  "config_filename": "example_config_block.php",
+
+  "server_folder": "/home/ibcbquil/public_html/BCB_CAMPAIGN1/Example_v2",
+  "public_folder_url": "https://ibcb-s.com/BCB_CAMPAIGN1/Example_v2",
+  "landing_public_url": "https://ibcb-s.com/BCB_CAMPAIGN1/Example_v2/example_landing.html",
+  "thankyou_public_url": "https://ibcb-s.com/BCB_CAMPAIGN1/Example_v2/example_thankyou.html",
+
+  "email_subject_en": "Your Free Example Guide",
+  "email_subject_fr": "Votre guide gratuit Example",
+  "email_body_en": "Thank you for requesting your free guide. You can download it using the link below.",
+  "email_body_fr": "Merci d’avoir demandé votre guide gratuit. Vous pouvez le télécharger avec le lien ci-dessous.",
+
+  "featured_section_title": "Featured Picks",
+  "featured_section_subtitle": "Explore selected product ideas related to this guide.",
+
+  "featured_products": [
+    {
+      "title": "Product 1",
+      "description": "Short product description.",
+      "image_url": "",
+      "product_url": ""
+    },
+    {
+      "title": "Product 2",
+      "description": "Short product description.",
+      "image_url": "",
+      "product_url": ""
+    },
+    {
+      "title": "Product 3",
+      "description": "Short product description.",
+      "image_url": "",
+      "product_url": ""
+    },
+    {
+      "title": "Product 4",
+      "description": "Short product description.",
+      "image_url": "",
+      "product_url": ""
+    }
+  ],
+
+  "account_id": "ibcb",
+  "user_id": "claude_muanda",
+  "created_at": "",
+  "updated_at": ""
+}
