@@ -1,0 +1,68 @@
+{
+  "funnel_id": "testauto",
+  "funnel_name": "Test Auto",
+  "category_name": "Test Auto",
+  "guide_title": "Test Auto Guide",
+  "headline": "Style Ideas to Elevate Your Everyday Look",
+  "subtitle": "Download your free Women's Fashion guide and discover practical fashion ideas, outfit inspiration, and curated style picks.",
+  "cta_text": "Download the Free Guide",
+  "brand_name": "iBCB",
+  "logo_url": "",
+  "hero_image_url": "",
+  "guide_cover_url": "https://ibcb-a.com/bcb1_pdf/Women_Fashion_pdf/womens_images/Cover_Page_Women_Fashion_E.png",
+  "pdf_en_url": "https://ibcb-a.com/bcb1_pdf/Women_Fashion_pdf/Women_Fashion_Guide_EN.pdf",
+  "pdf_fr_url": "https://ibcb-a.com/bcb1_pdf/Women_Fashion_pdf/Guide_de_Mode_Feminine_F.pdf",
+  "product_category_url": "https://ibcb-a.com/product-category/women-fashion/",
+  "primary_color": "#7A1F4D",
+  "secondary_color": "#D4AF37",
+  "lead_capture_url": "https://ibcb-s.com/api/save_lead_v2.php",
+  "thankyou_url": "https://ibcb-s.com/BCB_CAMPAIGN1/Womens_Fashion_v2/womens_fashion_thankyou_v2.html",
+  "utm_campaign": "testauto_guide",
+  "language_default": "en",
+  "status": "draft",
+  "publish_folder": "womensfashion_v2",
+  "landing_filename": "womens_fashion_landing_v2.html",
+  "thankyou_filename": "womens_fashion_thankyou_v2.html",
+  "email_filename": "womens_fashion_email_v2.html",
+  "config_filename": "womens_fashion_config_block_v2.php",
+  "server_folder": "/home/ibcbquil/public_html/BCB_CAMPAIGN1/Womens_Fashion_v2",
+  "public_folder_url": "https://ibcb-s.com/BCB_CAMPAIGN1/Womens_Fashion_v2",
+  "landing_public_url": "https://ibcb-s.com/BCB_CAMPAIGN1/Womens_Fashion_v2/womens_fashion_landing_v2.html",
+  "thankyou_public_url": "https://ibcb-s.com/BCB_CAMPAIGN1/Womens_Fashion_v2/womens_fashion_thankyou_v2.html",
+  "email_subject_en": "Your Free Women's Fashion Guide",
+  "email_subject_fr": "Votre guide gratuit Mode Féminine",
+  "email_body_en": "Thank you for requesting your free Women's Fashion guide. You can download it using the link below.",
+  "email_body_fr": "Merci d’avoir demandé votre guide gratuit Mode Féminine. Vous pouvez le télécharger avec le lien ci-dessous.",
+  "featured_section_title": "Featured Women's Fashion Picks",
+  "featured_section_subtitle": "Explore selected fashion ideas and curated products to inspire your everyday style.",
+  "featured_products": [
+    {
+      "title": "Women's Fashion Pick 1",
+      "description": "A curated fashion item selected to inspire your everyday style.",
+      "image_url": "",
+      "product_url": "https://ibcb-a.com/product-category/women-fashion/"
+    },
+    {
+      "title": "Women's Fashion Pick 2",
+      "description": "A practical style idea for casual, elegant, or everyday outfits.",
+      "image_url": "",
+      "product_url": "https://ibcb-a.com/product-category/women-fashion/"
+    },
+    {
+      "title": "Women's Fashion Pick 3",
+      "description": "A selected fashion accessory or clothing idea for a polished look.",
+      "image_url": "",
+      "product_url": "https://ibcb-a.com/product-category/women-fashion/"
+    },
+    {
+      "title": "Women's Fashion Pick 4",
+      "description": "A recommended fashion pick to complete your wardrobe inspiration.",
+      "image_url": "",
+      "product_url": "https://ibcb-a.com/product-category/women-fashion/"
+    }
+  ],
+  "account_id": "ibcb",
+  "user_id": "claude_muanda",
+  "created_at": "",
+  "updated_at": ""
+}
