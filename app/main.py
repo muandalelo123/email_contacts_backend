@@ -270,7 +270,7 @@ def send_email_to_all(
     campaign = Campaign(
         subject=payload.subject,
         html=payload.body,
-        from_code="ses",  # corrigé : on force Amazon SES
+        from_code="sendgrid",  # Test actuel via Sendgrid
     )
     db.add(campaign)
     db.commit()
@@ -280,6 +280,7 @@ def send_email_to_all(
         db,
         campaign_id=campaign.id,
         sender_code=campaign.from_code,
+        segment_code="internal_test",
     )
 
     jobs = (
@@ -448,6 +449,7 @@ def enqueue_one_job(
 @app.post("/send-to-all/{campaign_id}")
 def send_to_all_campaign(
     campaign_id: int,
+    segment_code: str = "internal_test",
     db: Session = Depends(get_db),
     api_key=Depends(verify_api_key),
 ):
@@ -459,9 +461,14 @@ def send_to_all_campaign(
         db,
         campaign_id=campaign_id,
         sender_code=campaign.from_code,
+        segment_code=segment_code,
     )
-    return {"campaign_id": campaign_id, "jobs_created": created}
 
+    return {
+        "campaign_id": campaign_id,
+        "segment_code": segment_code,
+        "jobs_created": created,
+    }
 
 @app.post("/queue/process/{campaign_id}")
 def enqueue_campaign_jobs(
@@ -484,6 +491,29 @@ def enqueue_campaign_jobs(
         jobs_service.enqueue_send_job(job.id)
 
     return {"campaign_id": campaign_id, "enqueued": len(jobs)}
+
+
+@app.get("/campaigns")
+def list_campaigns(
+    db: Session = Depends(get_db),
+    api_key=Depends(verify_api_key),
+):
+    campaigns = (
+        db.query(Campaign)
+        .order_by(Campaign.id.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": campaign.id,
+            "subject": campaign.subject,
+            "from_code": campaign.from_code,
+            "created_at": campaign.created_at,
+        }
+        for campaign in campaigns
+    ]
+
 
 
 @app.get("/campaigns/status/{campaign_id}", response_model=CampaignStatus)

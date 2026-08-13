@@ -60,6 +60,37 @@ class Contact(Base):
         cascade="all, delete-orphan",
     )
 
+# ============================================================
+# SEGMENTS
+# ============================================================
+
+class Segment(Base):
+    __tablename__ = "segments"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(100), unique=True, nullable=False)
+    name = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ContactSegment(Base):
+    __tablename__ = "contact_segments"
+
+    contact_id = Column(
+        Integer,
+        ForeignKey("contacts.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+
+    segment_id = Column(
+        Integer,
+        ForeignKey("segments.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+
+    source = Column(String(100), nullable=True)
+    joined_at = Column(DateTime, default=datetime.utcnow, nullable=True)
+
 
 # ============================================================
 # SOUMISSIONS DE LEADS (landing pages)

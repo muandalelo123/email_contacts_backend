@@ -13,6 +13,10 @@ from sqlalchemy.orm import Session
 from . import email_utils
 from .config import get_settings
 
+from app.models import SettingsSMTP
+
+
+
 settings = get_settings()
 
 
@@ -133,11 +137,11 @@ def _send_via_ses(
     except ImportError as exc:
         raise RuntimeError("boto3 is required for SES") from exc
 
-    aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
-    aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-    aws_region = os.getenv("AWS_REGION", "us-east-1")
-    from_email = os.getenv("SES_FROM_EMAIL", "contact@ibcb-a.com")
-    from_name = os.getenv("SENDER_NAME", "iBCB")
+    aws_access_key = settings.AWS_ACCESS_KEY_ID
+    aws_secret_key = settings.AWS_SECRET_ACCESS_KEY
+    aws_region = settings.AWS_REGION or "us-east-1"
+    from_email = settings.SES_FROM_EMAIL or "contact@ibcb-a.com"
+    from_name = settings.SENDER_NAME or "iBCB"
 
     if not aws_access_key:
         raise RuntimeError("AWS_ACCESS_KEY_ID missing")
@@ -181,8 +185,15 @@ def send_email_with_fallback(
     html: str,
     sender_code: str | None = None,
 ) -> dict:
-    # Forcé temporairement pour les tests SES
-    default_provider = "ses"
+    smtp_settings = db.query(SettingsSMTP).filter(SettingsSMTP.id == 1).first()
+
+    default_provider = (
+        smtp_settings.provider
+        if smtp_settings and smtp_settings.provider
+        else "gmail"
+    )
+
+
 
     provider_order = _build_provider_order(default_provider, sender_code)
     print(f"[EMAIL ROUTER] sender_code={sender_code}, provider_order={provider_order}")
