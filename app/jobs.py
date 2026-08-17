@@ -25,14 +25,17 @@ def _build_job_id(send_job_id: int) -> str:
     return f"{JOB_ID_PREFIX}{send_job_id}"
 
 
+# app/jobs.py
+
 def enqueue_send_job(send_job_id: int) -> None:
-    # Temporairement exécuté en direct pour simplifier les tests
-    # queue.enqueue(
-    #     process_send_job,
-    #     send_job_id,
-    #     job_id=_build_job_id(send_job_id),
-    # )
-    process_send_job(send_job_id)
+    queue.enqueue(
+        process_send_job,
+        send_job_id,
+        job_id=_build_job_id(send_job_id),
+    )
+
+
+
 
 
 def process_send_job(send_job_id: int) -> None:

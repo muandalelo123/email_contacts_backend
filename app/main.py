@@ -39,6 +39,11 @@ from .routers.settings_billing import router as settings_billing_router
 from .routers.settings_domain import router as settings_domain_router
 from .routers.settings_general import router as settings_general_router
 from .routers.settings_smtp import router as settings_smtp_router
+
+from .routers.funnels import router as funnels_router
+
+from . import funnels_service
+
 from .schemas import (
     CampaignCreate,
     CampaignRead,
@@ -73,6 +78,9 @@ app.include_router(settings_general_router)
 app.include_router(settings_api_keys_router)
 app.include_router(settings_billing_router)
 app.include_router(settings_domain_router)
+
+app.include_router(funnels_router)
+
 
 # ============================================================
 # SCHÉMAS LOCAUX
@@ -248,6 +256,12 @@ def create_lead_submission(
     db.add(submission)
     db.commit()
     db.refresh(submission)
+
+    funnels_service.create_and_schedule_funnel_run(
+        db,
+        submission=submission,
+    )
+
 
     return LeadSubmissionResponse(
         message="Lead saved successfully",

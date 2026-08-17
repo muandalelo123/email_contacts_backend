@@ -279,3 +279,80 @@ class DomainStatusResponse(BaseModel):
     records: Dict[str, DNSRecordDetail]
 
 
+# ============================================================
+# FUNNELS / AUTOMATIONS
+# ============================================================
+
+class FunnelStepCreate(BaseModel):
+    step_order: int
+    delay_minutes: int = 0
+    action_type: str = "email"
+    subject: Optional[str] = None
+    html: Optional[str] = None
+    is_active: bool = True
+
+
+class FunnelStepRead(FunnelStepCreate):
+    id: int
+    funnel_id: int
+    campaign_id: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class FunnelCreate(BaseModel):
+    name: str
+    category: str
+    preferred_provider: ProviderName = "gmail"
+    is_active: bool = True
+
+
+class FunnelUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[str] = None
+    preferred_provider: Optional[ProviderName] = None
+    is_active: Optional[bool] = None
+
+
+class FunnelRead(BaseModel):
+    id: int
+    name: str
+    category: str
+    preferred_provider: ProviderName
+    is_active: bool
+    created_at: datetime
+    steps: List[FunnelStepRead] = []
+
+    class Config:
+        from_attributes = True
+
+
+class FunnelRunRead(BaseModel):
+    id: int
+    funnel_id: int
+    contact_id: int
+    submission_id: Optional[int] = None
+    status: str
+    started_at: datetime
+    completed_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class FunnelStepRunRead(BaseModel):
+    id: int
+    funnel_run_id: int
+    funnel_step_id: int
+    status: str
+    scheduled_at: datetime
+    executed_at: Optional[datetime] = None
+    provider_used: Optional[str] = None
+    error_message: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+

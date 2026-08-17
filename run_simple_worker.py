@@ -64,7 +64,13 @@ def run_worker_forever(worker: SimpleWorker) -> NoReturn:
     while True:
         try:
             # burst=False => le worker reste en écoute en continu
-            worker.work(burst=False)
+
+            worker.work(
+                burst=False,
+                with_scheduler=True,
+            )
+
+
         except Exception as exc:  # noqa: BLE001
             logging.exception("Worker error: %s", exc)
             logging.info("Worker will restart in 5 seconds...")
